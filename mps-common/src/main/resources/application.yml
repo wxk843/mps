@@ -1,0 +1,146 @@
+server:
+  undertow:
+    direct-buffers: true
+  machineId: 1
+
+spring:
+  application:
+  #name: ecp-ms-xxx
+  datasource:
+    #url: jdbc:mysql://127.0.0.1:3306/wm_ecp?characterEncoding=utf8&useSSL=false
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    #username: root
+    #password:
+    continue-on-error: true
+    druid:
+      filters: stat,wall,log4j
+      initialSize: 10
+      minIdle: 100
+      maxActive: 100
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      stat-view-servlet:
+        login-password: evcos123456
+        login-username: evcos
+      #        allow: 127.0.0.1
+      aop-patterns: com.cesske.mps.repository.*
+      remove-abandoned: true
+      remove-abandoned-timeout: 1800
+      log-abandoned: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  redis:
+    #host: tunnel.i-driven.com.cn
+    #password: wm@(2018)
+    #port: 64379
+    database: 0
+    pool:
+      max-idle: 50
+      min-idle: 1
+      max-active: 40
+      max-wait: 3000
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        register: true
+        healthCheckPath: /actuator/health
+        health-check-interval: 2s
+        serviceName: ${spring.application.name}
+        instance-id: ${spring.application.name}:${spring.profiles.active}
+        tags: ${spring.application.name}-${spring.profiles.active}
+#  kafka:
+#    bootstrap-servers: 10.0.201.201:9092
+#    #指定默认topic id
+#    template:
+#      default-topic: topic-test
+#    #指定listener 容器中的线程数，用于提高并发量
+#    listener:
+#      concurrency: 3
+#    producer:
+#      batch-size: 65536
+#      buffer-memory: 524288
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    consumer:
+#      # bootstrap-servers: 10.0.201.201:9092
+#      #设置一个默认组
+#      group-id: demo-kafka
+#      # auto-offset-reset: earliest
+#      # enable-auto-commit: true
+#      # auto-commit-interval: 100
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+#logging:
+#  config: classpath:log/logback-${spring.profiles.active}.xml
+#  path: logs/
+
+management:
+  context-path: /actuator
+  #port: 8081
+  security:
+    enabled: false
+  #add-application-context-header: false
+  info:
+    git:
+      mode: full
+
+endpoints:
+  enabled: false
+  health:
+    enabled: true
+  info:
+    enabled: true
+  loggers:
+    enabled: true
+    sensitive: false
+  trace:
+    enabled: true
+  metrics:
+    enabled: true
+
+feign:
+  hystrix:
+    enabled: true
+  client:
+    config:
+      feignName:
+        connectTimeout: 5000
+        readTimeout: 5000
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 100000
+
+threadpool:
+  default:
+    coreSize: 500 #缺省为10
+
+metrics:
+  polling-interval-ms: 10000
+
+ribbon:
+  NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+  MaxAutoRetriesNextServer: 0
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+  MaxAutoRetries: 0
