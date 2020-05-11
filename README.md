@@ -20,5 +20,5 @@
 ## 3，错误异常日志，统一使用枚举类 ResultMsg 分ID端来区分不同的业务代码。例如系统级别错误（0-99） 用户登录相关（100-200）其他的自己定义。
 ## 4，其他相关注意事项待补充。。。。。。。。。
 
-    支持本地Dev环境和test测试环境进行开发调试，Dev环境(https://gitlab.ds-mc.cn/weltmeister/discovery) 需要自己手动拉取注册中心的项目并启动（crm-dev）环境，
+    支持本地Dev环境和test测试环境进行开发调试，Dev环境(hhttps://github.com/wxk843/mps.git) 需要自己手动拉取注册中心的项目并启动（dev）环境，
     test环境无需获取。
