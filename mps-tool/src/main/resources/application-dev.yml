@@ -1,0 +1,135 @@
+
+server:
+  port: 8095
+  undertow:
+    direct-buffers: true
+  machineId: 1
+
+spring:
+  application:
+    name: mps-tool
+  datasource:
+#    url: jdbc:mysql://localhost:3306/ck_mps?serverTimezone=UTC&characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://localhost:3306/ck_mps?characterEncoding=utf8&useSSL=false&autoReconnect=true&failOverReadOnly=false
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password:
+    continue-on-error: true
+    druid:
+      filters: stat,wall,log4j
+      initialSize: 10
+      minIdle: 100
+      maxActive: 100
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      stat-view-servlet:
+        login-password: evcos123456
+        login-username: evcos
+#        allow: 127.0.0.1
+#      aop-patterns: cn.dsmc.ecp.repository.*  //注释改行 否则分布式事务无法使用
+      remove-abandoned: true
+      remove-abandoned-timeout: 1800
+      log-abandoned: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  redis:
+    host: localhost
+    password: mps@123p
+    port: 6379
+    database: 0
+    pool:
+      max-idle: 50
+      min-idle: 1
+      max-active: 40
+      max-wait: 3000
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+       register: true
+       healthCheckPath: /actuator/health
+       health-check-interval: 2s
+       serviceName: ${spring.application.name}
+       instance-id: ${spring.application.name}:${spring.profiles.active}
+       tags: ${spring.application.name}-${spring.profiles.active}
+  #email
+  mail:
+    host: smtp.mxhichina.com
+    port: 465
+    username: alarm@cesske.com
+    password:
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
+logging:
+  config: classpath:log/logback-${spring.profiles.active}.xml
+  path: logs/
+
+management:
+ context-path: /actuator
+ security:
+   enabled: false
+ info:
+   git:
+     mode: full
+ health:
+   mail:
+     enabled: false
+
+endpoints:
+  enabled: false
+  health:
+    enabled: true
+  info:
+    enabled: true
+
+feign:
+  hystrix:
+    enabled: true
+  client:
+    config:
+      feignName:
+        connectTimeout: 50000
+        readTimeout: 50000
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 100000
+
+
+#分布式事务配置
+tm:
+  manager:
+    url: tx-manager
+
+ribbon:
+  NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+  MaxAutoRetriesNextServer: 0
+  ReadTimeout: 50000   #请求处理的超时时间
+  ConnectTimeout: 50000 #请求连接的超时时间
+  MaxAutoRetries: 0

@@ -8,7 +8,8 @@ spring:
   application:
     name: mps-user
   datasource:
-    url: jdbc:mysql://localhost:3306/ck_mps?serverTimezone=UTC&characterEncoding=utf8&useSSL=true
+#    url: jdbc:mysql://localhost:3306/ck_mps?serverTimezone=UTC&characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://localhost:3306/ck_mps?characterEncoding=utf8&useSSL=false&autoReconnect=true&failOverReadOnly=false
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
     username: root
@@ -61,6 +62,9 @@ spring:
         serviceName: ${spring.application.name}
         instance-id: ${spring.application.name}:${spring.profiles.active}
         tags: ${spring.application.name}-${spring.profiles.active}
+logging:
+  config: classpath:log/logback-${spring.profiles.active}.xml
+  path: logs/
 
 management:
   context-path: /actuator
