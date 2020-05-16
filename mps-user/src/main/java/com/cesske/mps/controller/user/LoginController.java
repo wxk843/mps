@@ -1,6 +1,7 @@
 package com.cesske.mps.controller.user;
 
 import com.cesske.mps.bean.*;
+import com.cesske.mps.constants.CommonConst;
 import com.cesske.mps.model.ServiceResponse;
 import com.cesske.mps.model.entity.user.User;
 import com.cesske.mps.service.user.ILoginService;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 @Api(value = "登录", description = "登录相关接口")
 @RestController
-@RequestMapping()
+@RequestMapping(CommonConst.API_PATH_VERSION_1)
 public class LoginController {
     @Autowired
     private ILoginService loginService;

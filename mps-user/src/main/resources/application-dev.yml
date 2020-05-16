@@ -65,6 +65,8 @@ spring:
 logging:
   config: classpath:log/logback-${spring.profiles.active}.xml
   path: logs/
+  level:
+    io.swagger.models.parameters.AbstractSerializableParameter: error
 
 management:
   context-path: /actuator

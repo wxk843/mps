@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * 修改密码
- * @author hubin
+ * @author
  */
 @Data
 @ApiModel

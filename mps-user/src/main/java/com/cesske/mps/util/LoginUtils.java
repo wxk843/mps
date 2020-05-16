@@ -25,8 +25,8 @@ public class LoginUtils {
 //    PrivateKey
 //    MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAN3HJ9OHrmZ320lI34/2+rXOYGR8tGbDbop79AEWAjECIhv+iuJddpqm7UADjzQw/1vlpce84m8mW3/SYXMcnotiqOKZe+QUKOC/LeS2DBG2oAJOvPGQjYctEmAPO2SKFt7jOL7OLrWrw2j/PEyoHH7PW0lyhFwO5iRse+645AGZAgMBAAECgYAo5+r4oTYRwFm6Eq7ppuxnTEGLR1Ue/z0MXgCLkrukvnf8Id8MEaEmtVNdU0q+nar8EEebp8M8LR8DXJKM4OJ9CxQo57YhsKOc/kL/EDxrK3ex70AIEx9y5trrTf8YedRcRoHMuRL7T8ljvX2g3NCCvEyVafmgAT7Q0BeGspNsAQJBAPv95Zq1O0le+X6vZhU3UVty0d8kLgNJqfVY6ZEVTEZqSbyZyVpAgysZXLYe94wZIpaSwD+z+zHTBz7uZc6FUVECQQDhTjqVah/BBOnA6vuYST49otMbAy00qpO5NfGlEMeZTOXnzijlntBY6179A51m3prOkZswH6CBnE3TaXkdUlnJAkAaYnU+A6fXgNhCyX64zff4yUbsRE+FDJt9Evgxtrcr0Ek0NC3/Ay44vwkUEJ3+z0rt1SPIB8JPbzcdAb0rKI5hAkEAyIr3PlNt3ELhReRi+dQH4JjzyxFyxXQndS383u4mm9+ErGYmpOxNizhGHnN/QTdXGBMmzRj5pyRXaZxyP5UzcQJABi1SCvZMogCDegW/sIdd504amdTlFAWgFeyz4WehuvV8Eh6RfhF36UigMKS0owhhsfzOfxi/rZBpKf1ug0/5uQ==
 
-//    @Value("${common.security.rsa.publicKey}")
-//    private String rsaPublicKeyString;
+    @Value("${common.security.rsa.publicKey}")
+    private String rsaPublicKeyString;
 
     @Value("${common.security.rsa.privateKey}")
     private String rsaPrivateKeyString;
@@ -34,15 +34,44 @@ public class LoginUtils {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    public String descryptPassword(String password) {
+    /**
+     * 解密
+     * @param password
+     * @return
+     */
+    public String decryptPassword(String password) {
         if(StringUtils.isEmpty(password)) {
             return null;
         }
-        byte[] descrypt = RSAEncrypterUtil.decryptByPrivateKey(Base64Utils.decodeFromString(password), RSAEncrypterUtil.getPrivateKey(rsaPrivateKeyString));
-        if(descrypt == null || descrypt.length == 0) {
+
+        //公钥加密-- 私钥解密
+//        String inputStr = password;
+//        byte[] data = inputStr.getBytes();
+//        byte[] encodedData = RSAEncrypterUtil.encryptByPublicKey(data,RSAEncrypterUtil.getPublicKey(rsaPublicKeyString));
+//        System.out.println(Base64Utils.encodeToString(encodedData));
+//        //打印加密字符串 为什么使用BASE64Encoder 因为在RSACoder里加密用的是 BASE64Encoder 加密
+//        String s = Base64Utils.encodeToString(encodedData);
+//        System.err.println("加密: " +s);
+//        byte[] decodedData = RSAEncrypterUtil.decryptByPrivateKey(encodedData, RSAEncrypterUtil.getPrivateKey(rsaPrivateKeyString));
+//        String outputStr = new String(decodedData);
+//        System.err.println("加密前: " + inputStr + "\n\r" + "解密后: " + outputStr);
+
+        byte[] decrypt = RSAEncrypterUtil.decryptByPrivateKey(Base64Utils.decodeFromString(password), RSAEncrypterUtil.getPrivateKey(rsaPrivateKeyString));
+        if(decrypt == null || decrypt.length == 0) {
             return null;
         }
-        return new String(descrypt);
+        return new String(decrypt);
+    }
+
+    public String encryptPassword(String password){
+        if(StringUtils.isEmpty(password)){
+            return null;
+        }
+        byte[] encrypt = RSAEncrypterUtil.encryptByPublicKey(password.getBytes(),RSAEncrypterUtil.getPublicKey(rsaPublicKeyString));
+        if(encrypt == null || encrypt.length == 0) {
+            return null;
+        }
+        return new String(encrypt);
     }
 
     public boolean checkCanPasswordLogin(String phone) {

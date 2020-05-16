@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -87,7 +89,7 @@ public class LoginServiceImpl implements ILoginService {
             if(StringUtils.isEmpty(loginBean.getPassword())) {
                 return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "密码不能为空");
             }
-            String plainPassword = loginUtils.descryptPassword(loginBean.getPassword());
+            String plainPassword = loginUtils.decryptPassword(loginBean.getPassword());
             if(StringUtils.isEmpty(plainPassword)) {
                 return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "密码错误");
             }
@@ -100,16 +102,25 @@ public class LoginServiceImpl implements ILoginService {
             log.info(CommonUtils.genLogString("用户名密码登录方式", logFormater, logMap));
             User user = userService.findOneByMobile(loginBean.getPhone());
 
+            if(loginBean.getPassword().equals(user.getPassword())) {
+                // 登录成功，清除密码错误记录
+                loginUtils.clearWrongPasswordLogin(loginBean.getPhone());
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("user", user);
+                //map.put("token", loginResponse.getData().getAccess_token());
+                return ServiceResponse.createSuccessResponse(loginBean.getTraceId(), map);
+            }else {
 
-            log.info(CommonUtils.genLogString("用户名密码登录方式 登录失败", logFormater, logMap));
-            log.info(CommonUtils.genLogString("用户名密码登录方式 登录失败", "login_error_action", logMap));
-            // 登录失败，失败计数自增
-            loginUtils.increaseWrongPasswordLogin(loginBean.getPhone());
-            long leftRetryTimes = loginUtils.leftWrongPasswordTimes(loginBean.getPhone());
-            if(leftRetryTimes > 0) {
-                return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), String.format("密码输入错误，还可尝试%d次", leftRetryTimes));
-            } else {
-                return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "您已经多次输入错误，请找回密码或通过验证码登录");
+                log.info(CommonUtils.genLogString("用户名密码登录方式 登录失败", logFormater, logMap));
+                log.info(CommonUtils.genLogString("用户名密码登录方式 登录失败", "login_error_action", logMap));
+                // 登录失败，失败计数自增
+                loginUtils.increaseWrongPasswordLogin(loginBean.getPhone());
+                long leftRetryTimes = loginUtils.leftWrongPasswordTimes(loginBean.getPhone());
+                if (leftRetryTimes > 0) {
+                    return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), String.format("密码输入错误，还可尝试%d次", leftRetryTimes));
+                } else {
+                    return ServiceResponse.createFailResponse(loginBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "您已经多次输入错误，请找回密码或通过验证码登录");
+                }
             }
 
         } else {
@@ -149,16 +160,16 @@ public class LoginServiceImpl implements ILoginService {
     @Transactional
     @Override
     public ServiceResponse register(RegisterBean registerBean) {
+        System.out.println(registerBean);
         Preconditions.checkNotNull(registerBean, "registerBean is null");
-//        String logFormater = String.format("register %s", registerBean.getPhone());
         String logFormater = String.format("register_%s", registerBean.getPhone());
         Map<String, Object> logMap = Maps.newHashMap();
         logMap.put("registerBean", registerBean);
         // 验证码校验
-        if (!verifyCodeService.checkCode(registerBean.getPhone(), registerBean.getCode(),SmsType.MOBILE_REGISTER.getIndex())) {
-            return ServiceResponse.createFailResponse(registerBean.getTraceId(), ResultCodeConst.PROMPT_ERROR, "验证码错误");
-        }
-        String plainPassword = loginUtils.descryptPassword(registerBean.getPassword());
+//        if (!verifyCodeService.checkCode(registerBean.getPhone(), registerBean.getCode(),SmsType.MOBILE_REGISTER.getIndex())) {
+//            return ServiceResponse.createFailResponse(registerBean.getTraceId(), ResultCodeConst.PROMPT_ERROR, "验证码错误");
+//        }
+        String plainPassword = loginUtils.decryptPassword(registerBean.getPassword());
         if(StringUtils.isEmpty(plainPassword)) {
             return ServiceResponse.createFailResponse(registerBean.getTraceId(), ResultCodeConst.PROMPT_ERROR, "密码错误");
         }
@@ -166,7 +177,27 @@ public class LoginServiceImpl implements ILoginService {
             return ServiceResponse.createFailResponse(registerBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "请输入8~20个字符,由字母和数字组成的密码");
         }
         log.info(CommonUtils.genLogString("新用户注册", logFormater, logMap));
-        return ServiceResponse.createSuccessResponse("","");
+        User newUser = new User();
+        newUser.setMobile(registerBean.getPhone());
+        newUser.setType(0);
+        newUser.setStatus(1);
+        newUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        newUser.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+
+        User ecpUser = userService.findOneByMobile(registerBean.getPhone());
+        logMap.put("ecpUser", ecpUser);
+//        log.info(CommonUtils.genLogString("注册用户持久化前校验", logFormat, logMap));
+        if(ecpUser == null) {
+//            log.info(CommonUtils.genLogString("注册用户持久化前校验 本地没有用户信息", logFormat, logMap));
+            userService.saveOrUpdate(newUser);
+        }
+        // 注册成功，清除密码错误记录
+        loginUtils.clearWrongPasswordLogin(registerBean.getPhone());
+
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("user", newUser);
+        //map.put("token", registerResponse.getData().getAccess_token());
+        return ServiceResponse.createSuccessResponse(registerBean.getTraceId(), map);
     }
 
     /**
@@ -198,7 +229,7 @@ public class LoginServiceImpl implements ILoginService {
         if(!verifyCodeService.checkCode(passwordUpdateBean.getPhone(), passwordUpdateBean.getCode(),SmsType.MOBILE_FIND_PWD.getIndex())) {
             return ServiceResponse.createFailResponse(passwordUpdateBean.getTraceId(), ResultCodeConst.PROMPT_ERROR, "验证码错误");
         }
-        String plainPassword = loginUtils.descryptPassword(passwordUpdateBean.getPassword());
+        String plainPassword = loginUtils.decryptPassword(passwordUpdateBean.getPassword());
         if(StringUtils.isEmpty(plainPassword)) {
             return ServiceResponse.createFailResponse(passwordUpdateBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "密码错误");
         }
@@ -225,8 +256,8 @@ public class LoginServiceImpl implements ILoginService {
         Map<String, Object> logMap = Maps.newHashMap();
         logMap.put("passwordModify", passwordModifyBean);
 
-        String plainOldPassword = loginUtils.descryptPassword(passwordModifyBean.getOldPassword());
-        String plainNewPassword = loginUtils.descryptPassword(passwordModifyBean.getNewPassword());
+        String plainOldPassword = loginUtils.decryptPassword(passwordModifyBean.getOldPassword());
+        String plainNewPassword = loginUtils.decryptPassword(passwordModifyBean.getNewPassword());
         if(StringUtils.isEmpty(plainOldPassword) || StringUtils.isEmpty(plainNewPassword)) {
             return ServiceResponse.createFailResponse(passwordModifyBean.getTraceId(), ResultMsg.PROMPT_ERROR.getIndex(), "密码错误");
         }

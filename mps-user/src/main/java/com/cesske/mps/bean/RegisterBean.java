@@ -6,13 +6,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 /**
  * 登陆参数类
- * @author hubin
+ * @author
  */
 @Data
 @ApiModel

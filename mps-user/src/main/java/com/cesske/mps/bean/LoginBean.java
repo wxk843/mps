@@ -12,7 +12,7 @@ import javax.validation.constraints.Pattern;
 
 /**
  * 登陆参数类
- * @author hubin
+ * @author
  */
 @Data
 @ApiModel
