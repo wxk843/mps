@@ -65,10 +65,10 @@ spring:
        tags: ${spring.application.name}-${spring.profiles.active}
   #email
   mail:
-    host: smtp.mxhichina.com
+    host: smtp.163.com
     port: 465
-    username: alarm@cesske.com
-    password:
+    username: wangxiaoke829@163.com
+    password: w123123123
     default-encoding: UTF-8
     properties:
       mail:

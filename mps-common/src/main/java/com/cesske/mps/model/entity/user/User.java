@@ -20,6 +20,11 @@ public class User implements Serializable {
     @Column(name = "r_id")
 	private Long rid;
 
+	//密码
+	@ApiModelProperty(value = "密码")
+	@Column(name = "password")
+	private String password;
+
 	// 微信openId
 	@ApiModelProperty(value = "微信openId")
 	@Column(name = "openid")

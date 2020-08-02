@@ -17,7 +17,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class UserController {
     @ApiOperation(value = "获取用户详情", notes = "根据id获取用户详情", httpMethod = "GET")
     @RequestMapping(value = "/find", method = RequestMethod.GET)
-    public String findByRid(  ) {
+    public String findByRid() {
+        return "";
+    }
+
+    @ApiOperation(value = "用户", notes = "根据id获取用户详情", httpMethod = "GET")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public String findAll() {
         return "";
     }
 }
