@@ -6,6 +6,9 @@ import com.cesske.mps.model.ServiceResponse;
 import com.cesske.mps.utils.StringUtils;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUploadBase;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.MultipartProperties;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,7 +17,7 @@ import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.web.multipart.MultipartException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
@@ -114,6 +117,35 @@ class GlobalException {
         log.error("excption_global "+ ex.getMessage().replaceAll("\r\n","")+" exception_str "+StringUtils.ExpToString(ex));
         ServiceResponse serviceResponse = ServiceResponse.defaultFailResponse(serverId);
         return serviceResponse;
+    }
+
+    @Autowired
+    private MultipartProperties multipartProperties;
+    /**
+     * 处理文件上传大小超限制
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(value = MultipartException.class)
+    @ResponseBody
+    public ServiceResponse fileUploadExceptionHandler(HttpServletRequest request, MultipartException ex)  {
+        String serverId = ServletRequestUtils.getStringParameter(request, CommonConst.TRACE_ID, "");
+        String msg;
+        Map<String, String> errors = Maps.newHashMap();
+//        Throwable cause = ex.getRootCause();
+        Throwable cause = ex.getCause().getCause();
+        if (cause instanceof FileUploadBase.FileSizeLimitExceededException) {
+            msg="上传文件过大[单个文件大小不得超过" + multipartProperties.getMaxFileSize() + "]";
+            //log.error(ex.getMessage());
+        }else if(cause instanceof FileUploadBase.SizeLimitExceededException){
+            msg="上传文件过大[总上传大小不得超过" + multipartProperties.getMaxRequestSize() + "]";
+            //log.error(ex.getMessage());
+        }else {
+            msg="文件上传失败[服务器异常]";
+            //log.error(ex.getMessage());
+        }
+        //log.error(msg, ex);
+        return ServiceResponse.createFailResponse(serverId, ResultCodeConst.PROMPT_ERROR, errors, msg);
     }
 
 }

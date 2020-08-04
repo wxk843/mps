@@ -80,6 +80,21 @@ spring:
         starttls:
           enable: true
           required: true
+#  servlet:
+#    multipart:
+#      max-file-size: 100MB
+#      max-request-size: 100MB
+#      enabled: true
+  http:
+    multipart:
+      enabled: true
+      # 单个文件的最大值
+      max-file-size: 2MB
+      # 上传文件总的最大值
+      max-request-size: 200MB
+#      maxFileSize: 2Mb
+#      maxRequestSize: 50Mb
+
 logging:
   config: classpath:log/logback-${spring.profiles.active}.xml
   path: logs/
@@ -133,3 +148,10 @@ ribbon:
   ReadTimeout: 50000   #请求处理的超时时间
   ConnectTimeout: 50000 #请求连接的超时时间
   MaxAutoRetries: 0
+
+file:
+  #静态资源对外暴露的访问路径
+  staticAccessPath: /upload/**
+  # 文件上传目录
+  uploadFolder: D://java/mps/upload/
+  #uploadFolder： /usr/local/
