@@ -2,19 +2,22 @@ package com.cesske.mps.client;
 
 import com.cesske.mps.client.impl.MsToolClientHystrix;
 import com.cesske.mps.config.FeignConfig;
+import com.cesske.mps.config.MultipartSupportConfig;
 import com.cesske.mps.model.ServiceResponse;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 /**
- * ms-tool 微服务
- * @author hubin
+ * mps-tool 微服务
+ * @author deray.wang
  */
-@FeignClient(name = "ecp-ms-tool", configuration = FeignConfig.class, fallback = MsToolClientHystrix.class)
+@FeignClient(name = "mps-tool", configuration = MultipartSupportConfig.class, fallback = MsToolClientHystrix.class)
 public interface IMsToolClient {
 
     /**
@@ -63,4 +66,7 @@ public interface IMsToolClient {
             @RequestParam(value = "scene") String scene
     );
 
+    //上传用户头像
+    @RequestMapping(value = "/v1/file/upload",method = RequestMethod.POST,consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ServiceResponse upload(@RequestPart("file") MultipartFile file);
 }

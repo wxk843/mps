@@ -2,6 +2,7 @@ package com.cesske.mps.controller.email;
 
 import com.alibaba.fastjson.JSON;
 import com.cesske.mps.constants.CommonConst;
+import com.cesske.mps.constants.ResultCodeConst;
 import com.cesske.mps.model.ServiceResponse;
 import com.cesske.mps.util.email.MailUtil;
 import com.google.common.base.Strings;
@@ -44,10 +45,10 @@ public class EmailController {
             @RequestParam(value = "mailSubject", required = true) String mailSubject,
             @RequestParam(value = "mailContent", required = true) String mailContent){
 
-//        if(Strings.isNullOrEmpty(mailSubject) && Strings.isNullOrEmpty(mailContent)){
-//            return ServiceResponse.createFailResponse("", ResultCodeConst.PROMPT_ERROR,"参数不能为空");
-//        }
-//
+        if(Strings.isNullOrEmpty(mailSubject) && Strings.isNullOrEmpty(mailContent)){
+            return ServiceResponse.createFailResponse("", ResultCodeConst.PROMPT_ERROR,"参数不能为空");
+        }
+        System.out.println(mailSubject+mailContent);
 //        return emailService.sendEmail(mailSubject,mailContent,profile);
         return ServiceResponse.createSuccessResponse("","发送成功");
 

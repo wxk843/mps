@@ -1,26 +1,21 @@
 package com.cesske.mps.controller.file;
 
 
+import com.cesske.mps.constants.CommonConst;
 import com.cesske.mps.model.ServiceResponse;
 import com.cesske.mps.service.file.FileService;
 import io.swagger.annotations.*;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sun.nio.ch.IOUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/file")
+@RequestMapping(value = CommonConst.API_PATH_VERSION_1+"/file")
 public class FileController {
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
@@ -33,7 +28,8 @@ public class FileController {
     @ApiOperation(value = "单文件上传",notes = "单文件上传")
     @RequestMapping(value = "/upload",method = RequestMethod.POST,headers = "content-type=multipart/form-data")
     @ResponseBody
-    public ServiceResponse uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public ServiceResponse uploadFile(@RequestParam("file") MultipartFile file) {
+        System.out.println("mail Test!+++++++++++++++++=============================");
         System.out.println(file.toString());
         if (null == file) {
             return ServiceResponse.createFailResponse("",0,"上传失败，无法找到文件！");
