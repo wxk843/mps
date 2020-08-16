@@ -124,6 +124,7 @@
         <module>../mps-common</module>
         <module>../mps-user</module>
         <module>../mps-tool</module>
+        <module>../mps-order</module>
         <module>../tx-manager</module>
     </modules>
     <build>
