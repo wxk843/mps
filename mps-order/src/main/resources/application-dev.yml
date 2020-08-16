@@ -1,0 +1,127 @@
+server:
+  port: 8086
+  undertow:
+    direct-buffers: true
+  machineId: 1
+
+spring:
+  application:
+    name: mps-order
+  datasource:
+#    url: jdbc:mysql://localhost:3306/ck_mps?serverTimezone=UTC&characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://localhost:3306/ck_mps?characterEncoding=utf8&useSSL=false&autoReconnect=true&failOverReadOnly=false
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password:
+    continue-on-error: true
+    druid:
+      filters: stat,wall,log4j
+      initialSize: 10
+      minIdle: 100
+      maxActive: 100
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      stat-view-servlet:
+        login-password: evcos123456
+        login-username: evcos
+      #        allow: 127.0.0.1
+      aop-patterns: com.cesske.mps.repository.*
+      remove-abandoned: true
+      remove-abandoned-timeout: 1800
+      log-abandoned: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#    show-sql: true
+  redis:
+    host: localhost
+    password: mps@123p
+    port: 6379
+    database: 0
+    pool:
+      max-idle: 50
+      min-idle: 1
+      max-active: 40
+      max-wait: 3000
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        register: true
+        healthCheckPath: /actuator/health
+        health-check-interval: 2s
+        serviceName: ${spring.application.name}
+        instance-id: ${spring.application.name}:${spring.profiles.active}
+        tags: ${spring.application.name}-${spring.profiles.active}
+
+#mybatis的相关配置
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.cesske.mps.entity
+  #开启驼峰命名
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+#    mapUnderscoreToCamelCase: true
+logging:
+  config: classpath:log/logback-${spring.profiles.active}.xml
+  path: logs/
+  level:
+    io.swagger.models.parameters.AbstractSerializableParameter: error
+
+management:
+  context-path: /actuator
+  security:
+    enabled: false
+  info:
+    git:
+      mode: full
+
+endpoints:
+  enabled: false
+  health:
+    enabled: true
+  info:
+    enabled: true
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          thread:
+            timeoutInMilliseconds: 100000
+  threadpool:
+    default:
+      coreSize: 500 #缺省为10
+  metrics:
+    polling-interval-ms: 10000
+
+feign:
+  client:
+    config:
+      feignName:
+        connectTimeout: 5000
+        readTimeout: 5000
+
+common:
+  security:
+    rsa:
+      publicKey: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdxyfTh65md9tJSN+P9vq1zmBkfLRmw26Ke/QBFgIxAiIb/oriXXaapu1AA480MP9b5aXHvOJvJlt/0mFzHJ6LYqjimXvkFCjgvy3ktgwRtqACTrzxkI2HLRJgDztkihbe4zi+zi61q8No/zxMqBx+z1tJcoRcDuYkbHvuuOQBmQIDAQAB
+      privateKey: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAN3HJ9OHrmZ320lI34/2+rXOYGR8tGbDbop79AEWAjECIhv+iuJddpqm7UADjzQw/1vlpce84m8mW3/SYXMcnotiqOKZe+QUKOC/LeS2DBG2oAJOvPGQjYctEmAPO2SKFt7jOL7OLrWrw2j/PEyoHH7PW0lyhFwO5iRse+645AGZAgMBAAECgYAo5+r4oTYRwFm6Eq7ppuxnTEGLR1Ue/z0MXgCLkrukvnf8Id8MEaEmtVNdU0q+nar8EEebp8M8LR8DXJKM4OJ9CxQo57YhsKOc/kL/EDxrK3ex70AIEx9y5trrTf8YedRcRoHMuRL7T8ljvX2g3NCCvEyVafmgAT7Q0BeGspNsAQJBAPv95Zq1O0le+X6vZhU3UVty0d8kLgNJqfVY6ZEVTEZqSbyZyVpAgysZXLYe94wZIpaSwD+z+zHTBz7uZc6FUVECQQDhTjqVah/BBOnA6vuYST49otMbAy00qpO5NfGlEMeZTOXnzijlntBY6179A51m3prOkZswH6CBnE3TaXkdUlnJAkAaYnU+A6fXgNhCyX64zff4yUbsRE+FDJt9Evgxtrcr0Ek0NC3/Ay44vwkUEJ3+z0rt1SPIB8JPbzcdAb0rKI5hAkEAyIr3PlNt3ELhReRi+dQH4JjzyxFyxXQndS383u4mm9+ErGYmpOxNizhGHnN/QTdXGBMmzRj5pyRXaZxyP5UzcQJABi1SCvZMogCDegW/sIdd504amdTlFAWgFeyz4WehuvV8Eh6RfhF36UigMKS0owhhsfzOfxi/rZBpKf1ug0/5uQ==
+
+#越权检查开关
+permission:
+  ischeck: true
