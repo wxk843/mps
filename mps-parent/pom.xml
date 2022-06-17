@@ -23,7 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <guava.version>22.0</guava.version>
         <java.version>1.8</java.version>
-        <fastjson.version>1.2.9</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <swagger.version>2.9.2</swagger.version>
         <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
         <logback.version>1.2.3</logback.version>
